@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Maker</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif; /* Standard font */
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            max-width: 800px; /* Increased max width */
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .editor {
+            margin-top: 20px;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .preview {
+            border: 5px solid black; /* Thick black border */
+            padding: 20px; /* Increased padding */
+            margin-top: 10px;
+            position: relative;
+            background-color: #fff; /* Ensure the background is white */
+            overflow: hidden; /* To contain the images */
+            height: 400px; /* Fixed height for better scaling */
+            display: flex; /* Added flex for layout */
+            flex-direction: column; /* Column layout */
+            justify-content: center; /* Center content */
+            align-items: center; /* Center content */
+        }
+        #preview-image {
+            max-width: 100%;
+            max-height: 300px; /* Increased max height */
+            display: block;
+            margin: 10px auto;
+        }
+        .discount {
+            background-color: red; /* Red background */
+            color: white; /* White text color */
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+            font-size: 1.2em; /* Bigger font size */
+            margin-top: 10px;
+            text-align: center; /* Center text */
+            position: relative; /* Align normally */
+            z-index: 1; /* Ensure it's above other elements */
+        }
+        #logo {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            max-width: 80px; /* Size of the logo */
+            max-height: 80px;
+        }
+        h2 {
+            font-size: 3em; /* Increased heading size */
+            color: white; /* Change heading color to white */
+            background-color: black; /* Optional: Add background for contrast */
+            padding: 10px; /* Add some padding */
+            border-radius: 5px; /* Rounded corners for heading */
+        }
+        #preview-text {
+            color: black; /* Change preview text color to black */
+            font-size: 2.5em; /* Increase heading size */
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: black;
+            color: white;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Banner Maker</h1>
+        <button id="create-banner">Create a Banner</button>
+        <button id="save-banner" class="hidden">Save Banner</button> <!-- Save button -->
+        <button id="reset-banner" class="hidden">Reset</button> <!-- Reset button -->
+
+        <div id="editor" class="editor hidden">
+            <h2>Banner Editor</h2>
+            <input type="text" id="banner-text" placeholder="Enter your text" />
+            <input type="text" id="discount" placeholder="Enter discount (e.g., 50% OFF)" />
+            <input type="file" id="image-upload" multiple />
+            <input type="file" id="background-upload" />
+            <input type="file" id="logo-upload" placeholder="Upload Logo" />
+            <div class="preview" id="banner-preview">
+                <h3 id="preview-text"></h3>
+                <div id="preview-discount" class="discount"></div>
+                <img id="preview-image" alt="Banner Preview" />
+                <img id="logo" alt="Logo" style="display: none;" /> <!-- Logo placeholder -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script> <!-- html2canvas script -->
+    <script>
+        document.getElementById('create-banner').addEventListener('click', function() {
+            document.getElementById('editor').classList.remove('hidden');
+            document.getElementById('save-banner').classList.remove('hidden'); // Show save button
+            document.getElementById('reset-banner').classList.remove('hidden'); // Show reset button
+        });
+
+        document.getElementById('banner-text').addEventListener('input', function() {
+            document.getElementById('preview-text').innerText = this.value;
+        });
+
+        document.getElementById('discount').addEventListener('input', function() {
+            document.getElementById('preview-discount').innerText = this.value;
+        });
+
+        document.getElementById('image-upload').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const previewImage = document.getElementById('preview-image');
+            previewImage.style.display = 'block';
+            previewImage.src = ''; // Clear previous image
+            if (files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImage.src = event.target.result;
+                };
+                reader.readAsDataURL(files[0]); // Show the first uploaded image
+            }
+        });
+
+        document.getElementById('background-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('banner-preview').style.backgroundImage = `url(${event.target.result})`;
+                    document.getElementById('banner-preview').style.backgroundSize = 'cover';
+                    document.getElementById('banner-preview').style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('logo-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const logo = document.getElementById('logo');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    logo.src = event.target.result;
+                    logo.style.display = 'block'; // Show the logo
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('save-banner').addEventListener('click', function() {
+            const bannerPreview = document.getElementById('banner-preview');
+            html2canvas(bannerPreview).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'banner.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        });
+
+        document.getElementById('reset-banner').addEventListener('click', function() {
+            document.getElementById('banner-text').value = '';
+            document.getElementById('discount').value = '';
+            document.getElementById('preview-text').innerText = '';
+            document.getElementById('preview-discount').innerText = '';
+            document.getElementById('preview-image').src = '';
+            document.getElementById('logo').src = '';
+            document.getElementById('logo').style.display = 'none';
+            document.getElementById('banner-preview').style.backgroundImage = 'none';
+        });
+    </script>
+</body>
+</html>
+
